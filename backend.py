@@ -1,23 +1,42 @@
-import folium
 import pandas as pd
+import folium
+from folium import plugins
 import math
 
-df = pd.read_csv("data/usa-hospital-beds_dataset_usa-hospital-beds.csv")
+def data_filter(dataframe_path, features):
+    '''
+    Returns a subset dataframe of the original with the selected features
 
-# Make a dataframe with only the features to display in the map
-# Choosing features
-features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS","HQ_CITY","STATE_NAME","HQ_ZIP_CODE"]
+    Parameters:
 
-# make the sub-dataframe
-sub_df = df[features]
+    dataframe_path (string): Path to the original dataframe
 
-def map_state(state_name):
+    features (list of strings): Dataframe columns to use in application
+    '''
+
+    df = pd.read_csv(dataframe_path)
+
+    sub_dataframe = df[features]
+
+    return sub_dataframe
+
+
+def map_state(data, state):
+    '''
+    returns a subset dataframe of the original with the selected features
+
+    Parameters:
+
+    data (pandas.dataframe): Path to the original dataframe
+
+    query (string): location to return hospitals
+    '''
 
     # Filter dataframe by state
-    is_state = sub_df["STATE_NAME"] == state_name
+    is_state = data["STATE_NAME"] == state
 
     # Make chosen state dataframe
-    state_df = sub_df[is_state].reset_index(drop=True)
+    state_df = data[is_state].reset_index(drop=True)
 
     # Coordinates are read [Y, X] AKA [latitute, longitude]
     center_coords = [state_df["Y"].mean(),state_df["X"].mean()]
@@ -36,25 +55,34 @@ def map_state(state_name):
         pp = folium.Html(popup_string, script=True)
         popup = folium.Popup(pp, max_width=2560)
 
-        tooltip_string = "Beds Available: "
+        tooltip_string = "Beds "
 
         # Iterate through dataframe and round the bed capacity for display
-        cap = state_df.loc[i, "BED_UTILIZATION"]
+        cap = 100*(1-state_df.loc[i, "BED_UTILIZATION"])
+
+        if cap > 66:
+            color_mapping = "green"
+        elif cap > 33:
+            color_mapping = "orange"
+        else:
+            color_mapping = "red"
 
         if int(math.isnan(cap)):
             tooltip_string += "Data Not Available"
+            color_mapping = "gray"
         else:
-            # Use an f-string to calculate bed availability percentage and round the result in a single line
-            #tooltip_string += f'{1-cap:.2f}' +"%"
-            tooltip_string += f'{100*(1-cap):.2f}' +"%"
+            tooltip_string += f'{cap:.2f}' +"% Available"
 
         # Obtain marker coordinates from dataframe
         marker_coords = [state_df.loc[i, "Y"], state_df.loc[i, "X"]]
 
         # Add everything to the markers and add the markers to the map
-        folium.Marker(marker_coords,popup=popup, tooltip=tooltip_string).add_to(my_map)
+        # run help(folium.Icon) for further customization
+        # see available icons at https://fontawesome.com/v4.7.0/icons/
+        folium.Marker(marker_coords,popup=popup, tooltip=tooltip_string,
+        icon=folium.Icon(color=color_mapping,icon='hospital-o', prefix='fa')).add_to(my_map)
 
         # Save rendering and then display
-        my_map.save("map.html")
+        my_map.save("templates/map.html")
 
     #return my_map
