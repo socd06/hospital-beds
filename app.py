@@ -8,21 +8,24 @@ import math
 from forms import MapSeachForm
 
 # import from scripts folder
-from backend import map_state, data_filter
+from backend import map_location, data_filter, capacity_mapping
 
 # data preprocessing
-
 # read from data folder
 df_path = "data/usa-hospital-beds_dataset_usa-hospital-beds.csv"
 
 # feature selection
-features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS","HQ_CITY","STATE_NAME","HQ_ZIP_CODE"]
+features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS",
+"HQ_CITY","STATE_NAME","HQ_ZIP_CODE","NUM_STAFFED_BEDS","ADULT_ICU_BEDS","PEDI_ICU_BEDS"]
 
 # Making data subset
 df = data_filter(df_path, features)
 
 # Listing all states
 available_states = df['STATE_NAME'].unique()
+
+# Listing all states
+available_cities = df['HQ_CITY'].unique()
 
 ############ flask app begins ############
 app = Flask(__name__)
@@ -36,19 +39,27 @@ def index():
     form = MapSeachForm()
 
     if form.validate_on_submit():
-        # Notify user the app is working
+
+        # When searching by city
+        flash(f'Searching for hospitals in {form.city_name.data}', 'success')
+
+        if form.city_name.data in available_cities:
+            # Make a map of the searched cities
+            map = map_location(data=df,location=form.city_name.data, level="city")
+            return redirect(url_for('map'))
+        else:
+            flash(f'{form.city_name.data} not found or not available. Please try again. Input is case-sensitive.', 'danger')
+
+        # When searching by state
         flash(f'Searching for hospitals in {form.state_name.data}', 'success')
 
         if form.state_name.data in available_states:
             # Make a map of the searched state
-            map = map_state(data=df,state=form.state_name.data)
+            map = map_location(data=df,location=form.state_name.data, level="state")
             return redirect(url_for('map'))
-
         else:
             flash(f'{form.state_name.data} not found or not available. Please try again. Input is case-sensitive.', 'danger')
 
-        # oringinally here
-        #return redirect(url_for('map'))
     return render_template('index.html', form=form)
 
 # Create an index url to prevent not found 404 error
