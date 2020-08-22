@@ -2,6 +2,6 @@ folium
 altair
 geopandas
 flask
+flask_sqlalchemy
 flask-lambda-python36
 Flask-WTF
-flask_sqlalchemy
