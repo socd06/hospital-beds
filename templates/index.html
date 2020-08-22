@@ -3,8 +3,29 @@
     <div class="content-section">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
+
+
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Find by State Name</legend>
+                <legend class="border-bottom mb-4">Find by City</legend>
+                <div class="form-group">
+                    {{ form.city_name.label(class="form-control-label") }}
+
+                    {% if form.city_name.errors %}
+                        {{ form.city_name(class="form-control form-control-lg is-invalid") }}
+
+                        <div class="invalid-feedback">
+                            {% for error in form.city_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.city_name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Find by State</legend>
                 <div class="form-group">
                     {{ form.state_name.label(class="form-control-label") }}
 
@@ -19,12 +40,17 @@
                         {{ form.state_name(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
             </div>
+
+            <span>City takes precedence over state.</span>
+            <span>Use one at a time. </span>
+
         </form>
     </div>
+
+    <h4><a href="mailto:csalgado@uwo.ca">Carlos Salgado © 2020</h4>
 
 {% endblock content %}
