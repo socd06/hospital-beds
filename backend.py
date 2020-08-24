@@ -117,6 +117,6 @@ def map_location(data, location, level):
         icon=folium.Icon(color=capacity_mapping(cap),icon='hospital-o', prefix='fa')).add_to(my_map)
 
         # Save rendering and then display
-        my_map.save("templates/map.html")
+        #my_map.save("templates/map.html")
 
-    #return my_map
+    return my_map

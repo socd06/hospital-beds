@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, flash, redirect
+from flask import Flask, render_template, url_for, flash, redirect, session
 
 import folium
 from folium.plugins import MarkerCluster
@@ -45,8 +45,11 @@ def index():
         flash(f'Searching for hospitals in {form.city_name.data}', 'success')
 
         if form.city_name.data in available_cities:
-            # Make a map of the searched cities
-            map = map_location(data=df,location=form.city_name.data, level="city")
+
+            # Save query string and location level (state or city) in flask session
+            session["query"] = form.city_name.data
+            session["level"] = "city"
+
             return redirect(url_for('map'))
         else:
             flash(f'{form.city_name.data} not found or not available. Please try again. Input is case-sensitive.', 'danger')
@@ -55,8 +58,11 @@ def index():
         flash(f'Searching for hospitals in {form.state_name.data}', 'success')
 
         if form.state_name.data in available_states:
-            # Make a map of the searched state
-            map = map_location(data=df,location=form.state_name.data, level="state")
+
+            # Save query string and location level (state or city) in flask session
+            session["query"] = form.state_name.data
+            session["level"] = "state"
+
             return redirect(url_for('map'))
         else:
             flash(f'{form.state_name.data} not found or not available. Please try again. Input is case-sensitive.', 'danger')
@@ -68,7 +74,9 @@ def index():
 # Define the function for the route
 def map():
 
-    return render_template('map.html')
+    folium_map = map_location(data=df,location=session["query"], level=session["level"])
+
+    return folium_map._repr_html_()
 
 
 if __name__ == '__main__':
