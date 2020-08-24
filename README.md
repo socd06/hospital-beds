@@ -47,14 +47,24 @@ Integrate more functionality such as:
 ### using a conda virtual environment (optional but recommended)
 Naming the environment "geojson"
 
-`conda create -n geojson python=3.7`
+`conda create -n flask python==3.7.6`
 
-`conda activate geojson`
+`conda activate flask`
 
-`conda install jupyter notebook` (Optional)
+`conda install jupyter notebook==5.7.8 tornado==4.5.3` (Optional)
 
 ### Installing dependencies
 `pip install -r requirements.txt`
+
+
+#### AWS EB requirements
+The following need to be in your requirements file in order for AWS Elastic Beanstalk to serve your app:
+- click==6.7
+- Flask==1.0.2
+- itsdangerous==0.24
+- Jinja2==2.10
+- MarkupSafe==1.1.1 (1.0 can cause errors)
+- Werkzeug==0.14.1
 
 ### Implementing "find near me" (Optional)
 You may do so using curl
