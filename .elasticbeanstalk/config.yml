@@ -1,0 +1,22 @@
+branch-defaults:
+  aws:
+    environment: flask-env
+    group_suffix: null
+environment-defaults:
+  flask-env:
+    branch: aws
+    repository: hospital-beds
+global:
+  application_name: hospital-beds
+  branch: aws
+  default_ec2_keyname: aws-eb
+  default_platform: Python 3.7
+  default_region: us-east-2
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: null
+  repository: hospital-beds
+  sc: git
+  workspace_type: Application

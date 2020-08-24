@@ -28,7 +28,8 @@ available_states = df['STATE_NAME'].unique()
 available_cities = df['HQ_CITY'].unique()
 
 ############ flask app begins ############
-app = Flask(__name__)
+# double equal sign for AWS
+application = app = Flask(__name__)
 
 # Configuration
 app.config['SECRET_KEY'] = "78f4d2ca06b3f9af87f963826c69e7e7"
