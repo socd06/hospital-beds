@@ -1,5 +1,6 @@
 __pycache__
 virt
+site-versions
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
