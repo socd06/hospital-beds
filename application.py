@@ -12,7 +12,7 @@ from backend import map_location, data_filter, capacity_mapping
 
 # data preprocessing
 # read from data folder
-df_path = "data/usa-hospital-beds_dataset_usa-hospital-beds.csv"
+df_path = "data/usa-hospital-beds.csv"
 
 # feature selection
 features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS",
