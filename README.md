@@ -47,11 +47,11 @@ Integrate more functionality such as:
 ### using a conda virtual environment (optional but recommended)
 Naming the environment "geojson"
 
-`conda create -n geojson python=3.7`
+`conda create -n flask python==3.7.6`
 
-`conda activate geojson`
+`conda activate flask`
 
-`conda install jupyter notebook` (Optional)
+`conda install jupyter notebook==5.7.8 tornado==4.5.3` (Optional)
 
 ### Installing dependencies
 `pip install -r requirements.txt`
