@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import Required, Optional, Length
 
-class MapSeachForm(FlaskForm):
+class MapSearchForm(FlaskForm):
     #STATE_NAME feature from dataset
     # DataRequired means it can't be empty
     state_name = StringField('STATE_NAME',
