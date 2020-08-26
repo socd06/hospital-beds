@@ -27,6 +27,12 @@ The dataset is from the [AWS Data Exchange](https://console.aws.amazon.com/datae
 ### Web App
 Using [Flask](https://flask.palletsprojects.com/en/1.1.x/) for [Python](https://www.python.org/) I wrote a barebones web app that would take in a search inquiry from the user and render another page from there. Then, I used [folium](https://python-visualization.github.io/folium/) to generate maps using the search inquiry. The search inquiry is processed with [Pandas](https://pandas.pydata.org/) since the app looks for the inquiry within a Comma Separated Values (*.csv) [dataset](https://aws.amazon.com/marketplace/pp/prodview-yivxd2owkloha?ref_=srh_res_product_title).
 
+### AWS Resources used
+- [AWS Data Exchange](https://console.aws.amazon.com/dataexchange/home?region=us-east-1#/products) [USA Hospital Beds | Definitive Healthcare](https://aws.amazon.com/marketplace/pp/prodview-yivxd2owkloha?ref_=srh_res_product_title) dataset
+- [Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/) For deployment of web application
+- [Amazon Elastic Compute Cloud (Amazon EC2)](https://aws.amazon.com/ec2/) for Linux 2 instance running the application on the cloud
+- [Amazon S3 AKA Amazon Simple Storage Service](https://aws.amazon.com/s3/) holding the dataset obtained through [AWS Data Exchange](https://console.aws.amazon.com/dataexchange/home?region=us-east-1#/products)
+
 ## Challenges I ran into
 The folium documentation is challenging since it's hard to search in and there are not many examples of fully-fleshed out applications using the framework. Another challenge was using Flask since I had only used it for a brief project before. Most people face the challenge of hosting with AWS, which can be very complicated for someone who has never used AWS before. I have completed some AWS training but never hosted a web app before.
 
