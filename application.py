@@ -1,18 +1,18 @@
-from flask import Flask, render_template, url_for, flash, redirect
+from flask import Flask, render_template, url_for, flash, redirect, session
 
 import folium
 from folium.plugins import MarkerCluster
 import pandas as pd
 import math
 # Import from forms script
-from forms import MapSeachForm
+from forms import MapSearchForm
 
 # import from scripts folder
-from backend import map_location, data_filter, capacity_mapping
+from backend import map_location, data_filter, capacity_mapping, process_input
 
 # data preprocessing
 # read from data folder
-df_path = "data/usa-hospital-beds_dataset_usa-hospital-beds.csv"
+df_path = "data/usa-hospital-beds.csv"
 
 # feature selection
 features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS",
@@ -37,26 +37,34 @@ app.config['SECRET_KEY'] = "78f4d2ca06b3f9af87f963826c69e7e7"
 @app.route('/', methods=['GET','POST'])
 def index():
 
-    form = MapSeachForm()
+    form = MapSearchForm()
 
     if form.validate_on_submit():
 
         # When searching by city
+        form.city_name.data = process_input(form.city_name.data)
         flash(f'Searching for hospitals in {form.city_name.data}', 'success')
 
         if form.city_name.data in available_cities:
-            # Make a map of the searched cities
-            map = map_location(data=df,location=form.city_name.data, level="city")
+
+            # Save query string and location level (state or city) in flask session
+            session["query"] = form.city_name.data
+            session["level"] = "city"
+
             return redirect(url_for('map'))
         else:
             flash(f'{form.city_name.data} not found or not available. Please try again. Input is case-sensitive.', 'danger')
 
         # When searching by state
+        form.state_name.data = process_input(form.state_name.data)
         flash(f'Searching for hospitals in {form.state_name.data}', 'success')
 
         if form.state_name.data in available_states:
-            # Make a map of the searched state
-            map = map_location(data=df,location=form.state_name.data, level="state")
+
+            # Save query string and location level (state or city) in flask session
+            session["query"] = form.state_name.data
+            session["level"] = "state"
+
             return redirect(url_for('map'))
         else:
             flash(f'{form.state_name.data} not found or not available. Please try again. Input is case-sensitive.', 'danger')
@@ -68,8 +76,9 @@ def index():
 # Define the function for the route
 def map():
 
-    return render_template('map.html')
+    folium_map = map_location(data=df,location=session["query"], level=session["level"])
 
+    return folium_map._repr_html_()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

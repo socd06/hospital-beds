@@ -4,11 +4,10 @@
         <form method="POST" action="">
             {{ form.hidden_tag() }}
 
-
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Find by City</legend>
                 <div class="form-group">
-                    {{ form.city_name.label(class="form-control-label") }}
+                    Enter a "City Name"
 
                     {% if form.city_name.errors %}
                         {{ form.city_name(class="form-control form-control-lg is-invalid") }}
@@ -27,8 +26,7 @@
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Find by State</legend>
                 <div class="form-group">
-                    {{ form.state_name.label(class="form-control-label") }}
-
+                    Or Enter a "State Name"
                     {% if form.state_name.errors %}
                         {{ form.state_name(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
@@ -51,6 +49,6 @@
         </form>
     </div>
 
-    <h4><a href="mailto:csalgado@uwo.ca">Carlos Salgado © 2020</h4>
+    <h6><a href="mailto:csalgado@uwo.ca">Carlos Salgado © 2020</h6>
 
 {% endblock content %}
