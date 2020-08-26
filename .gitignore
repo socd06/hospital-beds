@@ -1,6 +1,7 @@
 __pycache__
 virt
 site-versions
+data/.~lock*
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
