@@ -5,6 +5,25 @@
             {{ form.hidden_tag() }}
 
             <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Find by ZIP Code</legend>
+                <div class="form-group">
+                    Enter a 5-digits USA ZIP Code
+
+                    {% if form.zip_code.errors %}
+                        {{ form.zip_code(class="form-control form-control-lg is-invalid") }}
+
+                        <div class="invalid-feedback">
+                            {% for error in form.zip_code.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.zip_code(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+
+            <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Find by City</legend>
                 <div class="form-group">
                     Enter a "City Name"
@@ -43,7 +62,7 @@
                 {{ form.submit(class="btn btn-outline-info") }}
             </div>
 
-            <span>City takes precedence over state.</span>
+            <span>ZIP has priority and City takes precedence over state.</span>
             <span>Use one at a time. </span>
 
         </form>

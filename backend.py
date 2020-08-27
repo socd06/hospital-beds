@@ -3,52 +3,8 @@ import folium
 from folium import plugins
 import math
 import re
-
-def process_input(user_input):
-    '''
-    Returns the processed user input string where the first letter of every
-    word is always a capital letter so it matches the dataset
-
-    Parameters:
-
-    user_input (string): user input location search
-    '''
-
-    if len(user_input) >3:
-
-        lower_input = user_input.lower()
-
-        input_list = re.split(r'\s',lower_input)
-
-        output_str = ""
-
-        # White spaces should be 1 less than how many words
-        ws_qty = len(input_list) - 1
-        ws_count = 0
-
-        if len(input_list) > 1:
-
-            for elem in input_list:
-
-                # Make capital only the first letter of every word
-                output_str += elem[0].upper()
-
-                # Concatenate the rest of the word
-                output_str += elem[1::]
-
-                # Add a whitepace to the string if not in the last word of the list
-                if ws_count < ws_qty:
-                    output_str += " "
-                    ws_count+= 1
-        else:
-            output_str = lower_input[0].upper() + lower_input[1::]
-
-        return output_str
-
-    else:
-        return None
-
-
+import pgeocode
+from flask import session
 
 def data_filter(dataframe_path, features):
     '''
@@ -101,7 +57,7 @@ def map_location(data, location, level):
 
     location (string): location to return hospitals
 
-    level (string): "state" if location is a state name or "city" if it's a city
+    level (string): "state", "city" or "zip"
     '''
 
     if level == "state":
@@ -114,6 +70,9 @@ def map_location(data, location, level):
 
         zoom = 7
 
+        # Coordinates are read [Y, X] AKA [latitute, longitude]
+        center_coords = [df["Y"].mean(),df["X"].mean()]
+
     if level == "city":
 
         # Filter dataframe by city
@@ -124,8 +83,22 @@ def map_location(data, location, level):
 
         zoom = 12
 
-    # Coordinates are read [Y, X] AKA [latitute, longitude]
-    center_coords = [df["Y"].mean(),df["X"].mean()]
+        # Coordinates are read [Y, X] AKA [latitute, longitude]
+        center_coords = [df["Y"].mean(),df["X"].mean()]
+
+    if level == "zip":
+
+        city = session["query"]
+
+        center_coords = session["zip_coords"]
+
+        # Filter dataframe by city
+        is_city = data["HQ_CITY"] == city
+
+        # Make chosen state dataframe
+        df = data[is_city].reset_index(drop=True)
+
+        zoom = 15
 
     my_map = folium.Map(location = center_coords, zoom_start = zoom)
 
