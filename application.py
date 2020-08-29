@@ -5,17 +5,19 @@ from folium.plugins import MarkerCluster
 import pandas as pd
 import math
 # Import from forms script
-from forms import MapSearchForm
+from forms import MapSearchForm, process_input
 
 # import from scripts folder
-from backend import map_location, data_filter, capacity_mapping, process_input
+from backend import map_location, data_filter, capacity_mapping, get_corners
+
+import pgeocode
 
 # data preprocessing
 # read from data folder
 df_path = "data/usa-hospital-beds.csv"
 
 # feature selection
-features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS",
+features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS","COUNTY_NAME",
 "HQ_CITY","STATE_NAME","HQ_ZIP_CODE","NUM_STAFFED_BEDS","ADULT_ICU_BEDS","PEDI_ICU_BEDS"]
 
 # Making data subset
@@ -37,37 +39,79 @@ app.config['SECRET_KEY'] = "78f4d2ca06b3f9af87f963826c69e7e7"
 @app.route('/', methods=['GET','POST'])
 def index():
 
+    # Initialize pgeocode
+
+    country_init = pgeocode.Nominatim("us")
+
     form = MapSearchForm()
 
     if form.validate_on_submit():
 
+        if len(form.zip_code.data)> 0:
+
+            try:
+                # When searching by zip code
+                flash(f'Searching for hospitals around {form.zip_code.data} zip code.', 'success')
+
+                # Get city and center_coords with pgeocode
+                zip_query = country_init.query_postal_code(form.zip_code.data)
+
+                if pd.isna(zip_query.county_name) != True:
+
+                    # and saving the city and center coordinates for further use
+                    session["query"] = zip_query.county_name
+                    session["level"] = "zip"
+
+                    # Save center coordinates in the session to use with the mapping function
+                    session["zip_coords"] = [zip_query.latitude, zip_query.longitude]
+
+                    return redirect(url_for('map'))
+                else:
+                    flash(f'{form.zip_code.data} zip code not found or not available. Please try again.', 'danger')
+
+            except:
+                pass
+
         # When searching by city
-        form.city_name.data = process_input(form.city_name.data)
-        flash(f'Searching for hospitals in {form.city_name.data}', 'success')
 
-        if form.city_name.data in available_cities:
+        if len(form.city_name.data)> 0:
+            try:
+                form.city_name.data = process_input(form.city_name.data)
 
-            # Save query string and location level (state or city) in flask session
-            session["query"] = form.city_name.data
-            session["level"] = "city"
+                flash(f'Searching for hospitals in {form.city_name.data} city', 'success')
 
-            return redirect(url_for('map'))
-        else:
-            flash(f'{form.city_name.data} not found or not available. Please try again. Input is case-sensitive.', 'danger')
+                if form.city_name.data in available_cities:
 
-        # When searching by state
-        form.state_name.data = process_input(form.state_name.data)
-        flash(f'Searching for hospitals in {form.state_name.data}', 'success')
+                    # Save query string and location level (state or city) in flask session
+                    session["query"] = form.city_name.data
+                    session["level"] = "city"
 
-        if form.state_name.data in available_states:
+                    return redirect(url_for('map'))
 
-            # Save query string and location level (state or city) in flask session
-            session["query"] = form.state_name.data
-            session["level"] = "state"
+                else:
+                    flash(f'{form.city_name.data} city not found or not available. Please try again.', 'danger')
+            except:
+                pass
 
-            return redirect(url_for('map'))
-        else:
-            flash(f'{form.state_name.data} not found or not available. Please try again. Input is case-sensitive.', 'danger')
+
+        if len(form.state_name.data)> 0:
+            try:
+                form.state_name.data = process_input(form.state_name.data)
+
+                # When searching by state
+                flash(f'Searching for hospitals in {form.state_name.data} state', 'success')
+
+                if form.state_name.data in available_states:
+
+                    # Save query string and location level (state or city) in flask session
+                    session["query"] = form.state_name.data
+                    session["level"] = "state"
+
+                    return redirect(url_for('map'))
+                else:
+                    flash(f'{form.state_name.data} state not found or not available. Please try again.', 'danger')
+            except:
+                pass
 
     return render_template('index.html', form=form)
 

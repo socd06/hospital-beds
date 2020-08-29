@@ -3,52 +3,48 @@ import folium
 from folium import plugins
 import math
 import re
+import pgeocode
+from flask import session
 
-def process_input(user_input):
+def get_corners(dataframe, coordinates, radius):
     '''
-    Returns the processed user input string where the first letter of every
-    word is always a capital letter so it matches the dataset
+    Returns the coordinates after adding the radius in Kilometers
 
     Parameters:
 
-    user_input (string): user input location search
+    dataframe: Coordinates dataframe containing the points to be rendered
+
+    coordinates: zip code coordinates in list [longitude, latitude] format
+
+    radius: radius in Kilometers
     '''
 
-    if len(user_input) >3:
+    if radius == None:
+        sw = dataframe[['Y', 'X']].min().values.tolist()
+        ne = dataframe[['Y', 'X']].max().values.tolist()
 
-        lower_input = user_input.lower()
-
-        input_list = re.split(r'\s',lower_input)
-
-        output_str = ""
-
-        # White spaces should be 1 less than how many words
-        ws_qty = len(input_list) - 1
-        ws_count = 0
-
-        if len(input_list) > 1:
-
-            for elem in input_list:
-
-                # Make capital only the first letter of every word
-                output_str += elem[0].upper()
-
-                # Concatenate the rest of the word
-                output_str += elem[1::]
-
-                # Add a whitepace to the string if not in the last word of the list
-                if ws_count < ws_qty:
-                    output_str += " "
-                    ws_count+= 1
-        else:
-            output_str = lower_input[0].upper() + lower_input[1::]
-
-        return output_str
+        corners = [sw, ne]
 
     else:
-        return None
+        # in meters
+        angle = 45
+        earthRadius = 6371000
 
+        north_distance = math.sin(angle) * radius
+        east_distance = math.cos(angle) * radius
 
+        ne_latitude = coordinates[1] + (north_distance / earthRadius) * 180 / math.pi
+        ne_longitude = coordinates[0] + (east_distance / (earthRadius * math.cos(ne_latitude * 180 / math.pi))) * 180 / math.pi
+
+        sw_latitude = coordinates[1] - (north_distance / earthRadius) * 180 / math.pi
+        sw_longitude = coordinates[0] - (east_distance / (earthRadius * math.cos(ne_latitude * 180 / math.pi))) * 180 / math.pi
+
+        ne_corner = [ne_longitude, ne_latitude]
+        sw_corner = [sw_longitude, sw_latitude]
+
+        corners = [sw_corner, ne_corner]
+
+    return corners
 
 def data_filter(dataframe_path, features):
     '''
@@ -101,8 +97,9 @@ def map_location(data, location, level):
 
     location (string): location to return hospitals
 
-    level (string): "state" if location is a state name or "city" if it's a city
+    level (string): "state", "city" or "zip"
     '''
+    radius = None
 
     if level == "state":
 
@@ -112,7 +109,8 @@ def map_location(data, location, level):
         # Make chosen state dataframe
         df = data[is_state].reset_index(drop=True)
 
-        zoom = 7
+        # Coordinates are read [Y, X] AKA [latitute, longitude]
+        center_coords = [df["Y"].mean(),df["X"].mean()]
 
     if level == "city":
 
@@ -122,12 +120,30 @@ def map_location(data, location, level):
         # Make chosen state dataframe
         df = data[is_city].reset_index(drop=True)
 
-        zoom = 12
+        # Coordinates are read [Y, X] AKA [latitute, longitude]
+        center_coords = [df["Y"].mean(),df["X"].mean()]
 
-    # Coordinates are read [Y, X] AKA [latitute, longitude]
-    center_coords = [df["Y"].mean(),df["X"].mean()]
+    if level == "zip":
 
-    my_map = folium.Map(location = center_coords, zoom_start = zoom)
+        county = session["query"]
+
+        center_coords = session["zip_coords"]
+
+        # Filter dataframe by county to display more hospitals nearby
+        is_county = data["COUNTY_NAME"] == county
+
+        # Make chosen state dataframe
+        df = data[is_county].reset_index(drop=True)
+
+        # for now, default radius of 10 KM
+        radius = 10000
+
+    my_map = folium.Map(location = center_coords)
+
+    # Get the southwest and northeast corners to fit the map bounds
+    corners = get_corners(df, center_coords, radius)
+
+    my_map.fit_bounds(corners)
 
     for i in range(len(df)):
 
@@ -162,8 +178,5 @@ def map_location(data, location, level):
         # see available icons at https://fontawesome.com/v4.7.0/icons/
         folium.Marker(marker_coords,popup=popup, tooltip=tooltip_string,
         icon=folium.Icon(color=capacity_mapping(cap),icon='hospital-o', prefix='fa')).add_to(my_map)
-
-        # Save rendering and then display
-        #my_map.save("templates/map.html")
 
     return my_map
