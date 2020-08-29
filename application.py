@@ -8,7 +8,7 @@ import math
 from forms import MapSearchForm, process_input
 
 # import from scripts folder
-from backend import map_location, data_filter, capacity_mapping
+from backend import map_location, data_filter, capacity_mapping, get_corners
 
 import pgeocode
 
@@ -17,7 +17,7 @@ import pgeocode
 df_path = "data/usa-hospital-beds.csv"
 
 # feature selection
-features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS",
+features = ["Y","X","BED_UTILIZATION","HOSPITAL_NAME","HQ_ADDRESS","COUNTY_NAME",
 "HQ_CITY","STATE_NAME","HQ_ZIP_CODE","NUM_STAFFED_BEDS","ADULT_ICU_BEDS","PEDI_ICU_BEDS"]
 
 # Making data subset
@@ -56,10 +56,10 @@ def index():
                 # Get city and center_coords with pgeocode
                 zip_query = country_init.query_postal_code(form.zip_code.data)
 
-                if pd.isna(zip_query.place_name) != True:
+                if pd.isna(zip_query.county_name) != True:
 
                     # and saving the city and center coordinates for further use
-                    session["query"] = zip_query.place_name
+                    session["query"] = zip_query.county_name
                     session["level"] = "zip"
 
                     # Save center coordinates in the session to use with the mapping function

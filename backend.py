@@ -6,6 +6,46 @@ import re
 import pgeocode
 from flask import session
 
+def get_corners(dataframe, coordinates, radius):
+    '''
+    Returns the coordinates after adding the radius in Kilometers
+
+    Parameters:
+
+    dataframe: Coordinates dataframe containing the points to be rendered
+
+    coordinates: zip code coordinates in list [longitude, latitude] format
+
+    radius: radius in Kilometers
+    '''
+
+    if radius == None:
+        sw = dataframe[['Y', 'X']].min().values.tolist()
+        ne = dataframe[['Y', 'X']].max().values.tolist()
+
+        corners = [sw, ne]
+
+    else:
+        # in meters
+        angle = 45
+        earthRadius = 6371000
+
+        north_distance = math.sin(angle) * radius
+        east_distance = math.cos(angle) * radius
+
+        ne_latitude = coordinates[1] + (north_distance / earthRadius) * 180 / math.pi
+        ne_longitude = coordinates[0] + (east_distance / (earthRadius * math.cos(ne_latitude * 180 / math.pi))) * 180 / math.pi
+
+        sw_latitude = coordinates[1] - (north_distance / earthRadius) * 180 / math.pi
+        sw_longitude = coordinates[0] - (east_distance / (earthRadius * math.cos(ne_latitude * 180 / math.pi))) * 180 / math.pi
+
+        ne_corner = [ne_longitude, ne_latitude]
+        sw_corner = [sw_longitude, sw_latitude]
+
+        corners = [sw_corner, ne_corner]
+
+    return corners
+
 def data_filter(dataframe_path, features):
     '''
     Returns a subset dataframe of the original with the selected features
@@ -59,6 +99,7 @@ def map_location(data, location, level):
 
     level (string): "state", "city" or "zip"
     '''
+    radius = None
 
     if level == "state":
 
@@ -67,8 +108,6 @@ def map_location(data, location, level):
 
         # Make chosen state dataframe
         df = data[is_state].reset_index(drop=True)
-
-        zoom = 7
 
         # Coordinates are read [Y, X] AKA [latitute, longitude]
         center_coords = [df["Y"].mean(),df["X"].mean()]
@@ -81,26 +120,30 @@ def map_location(data, location, level):
         # Make chosen state dataframe
         df = data[is_city].reset_index(drop=True)
 
-        zoom = 12
-
         # Coordinates are read [Y, X] AKA [latitute, longitude]
         center_coords = [df["Y"].mean(),df["X"].mean()]
 
     if level == "zip":
 
-        city = session["query"]
+        county = session["query"]
 
         center_coords = session["zip_coords"]
 
-        # Filter dataframe by city
-        is_city = data["HQ_CITY"] == city
+        # Filter dataframe by county to display more hospitals nearby
+        is_county = data["COUNTY_NAME"] == county
 
         # Make chosen state dataframe
-        df = data[is_city].reset_index(drop=True)
+        df = data[is_county].reset_index(drop=True)
 
-        zoom = 15
+        # for now, default radius of 10 KM
+        radius = 10000
 
-    my_map = folium.Map(location = center_coords, zoom_start = zoom)
+    my_map = folium.Map(location = center_coords)
+
+    # Get the southwest and northeast corners to fit the map bounds
+    corners = get_corners(df, center_coords, radius)
+
+    my_map.fit_bounds(corners)
 
     for i in range(len(df)):
 
@@ -135,8 +178,5 @@ def map_location(data, location, level):
         # see available icons at https://fontawesome.com/v4.7.0/icons/
         folium.Marker(marker_coords,popup=popup, tooltip=tooltip_string,
         icon=folium.Icon(color=capacity_mapping(cap),icon='hospital-o', prefix='fa')).add_to(my_map)
-
-        # Save rendering and then display
-        #my_map.save("templates/map.html")
 
     return my_map
