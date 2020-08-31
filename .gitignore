@@ -1,9 +1,4 @@
-__pycache__
+data/archive
 virt
+__pycache__
 site-versions
-data/.~lock*
-
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
