@@ -79,6 +79,13 @@ Naming the environment "geojson"
 ### Installing dependencies
 `pip install -r requirements.txt`
 
+## Running the application locally
+
+Make sure your virtual environment is active and then run the following command on your on your command line:
+
+`python application.py`
+
+Open a browser and go to the localhost indicated by your command line (e.g. http://127.0.0.1:5000/, it can vary)
 
 #### AWS EB requirements
 The following need to be in your requirements file in order for AWS Elastic Beanstalk to serve your app:
@@ -88,3 +95,6 @@ The following need to be in your requirements file in order for AWS Elastic Bean
 - Jinja2==2.10
 - MarkupSafe==1.1.1 (1.0 can cause errors)
 - Werkzeug==0.14.1
+
+#### Heroku requirements
+- gunicorn
