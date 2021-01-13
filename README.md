@@ -1,11 +1,8 @@
 # hospital-beds
-USA hospital beds capacity web app. Try it at http://hospitalbeds.link/
-
-# Disclaimer
-Website currently down due to high AWS costs.
+USA hospital beds capacity web app. Originally developed on AWS but moved to Heroku. Try it at https://hospital-beds.herokuapp.com/
 
 ## Inspiration
-The COVID-19 lock down has us thinking twice before going out and thinking more than a couple times before going to a hospital if not in an emergency. Being at a hospital in these times can expose you to COVID-19 and other dangers just by being there. This tool can be used to get a glimpse of information about surrounding hospitals to help make a decision on which one to go if neccesary depending on how busy the **hospital beds** are.
+The COVID-19 lock down has us thinking twice before going out and thinking more than a couple times before going to a hospital if not in an emergency. Being at a hospital in these times can expose you to COVID-19 and other dangers just by being there. This tool can be used to get a glimpse of information about surrounding hospitals to help make a decision on which one to go if necessary depending on how busy the **hospital beds** are.
 
 ## What it does
 This web app lets you search in a **US** zip code, city or state and renders a map of hospitals in the selected area.
@@ -98,3 +95,4 @@ The following need to be in your requirements file in order for AWS Elastic Bean
 
 #### Heroku requirements
 - gunicorn
+- Profile pointing to application file using :app tag
