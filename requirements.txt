@@ -40,7 +40,6 @@ pathspec==0.5.9
 pgeocode==0.3.0
 pycparser==2.20
 PyNaCl==1.4.0
-pypiwin32==223
 pyrsistent==0.16.0
 python-dateutil==2.8.0
 pytz==2020.1
@@ -55,6 +54,5 @@ urllib3==1.24.3
 wcwidth==0.1.9
 websocket-client==0.57.0
 Werkzeug==0.14.1
-wincertstore==0.2
 WTForms==2.3.3
 zipp==3.1.0
